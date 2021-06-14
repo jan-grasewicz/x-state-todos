@@ -1,7 +1,8 @@
 import { createMachine, assign, spawn } from 'xstate'
+import { Filters, ITodo } from '../types'
 import { createTodoMachine } from './todoMachine'
 
-const createTodo = (title: string) => {
+const createTodo = (title: string): ITodo => {
   return {
     id: Number(String(Date.now()) + String(Math.floor(Math.random() * Math.pow(10, 5)))),
     title,
@@ -9,26 +10,72 @@ const createTodo = (title: string) => {
   }
 }
 
-export const todosMachine = createMachine({
+interface TodosContext {
+  todo: string
+  todos: ITodo[]
+  filter: Filters
+}
+
+type TodosEvent =
+  | { type: 'NEWTODO.CHANGE'; value: string }
+  | { type: 'NEWTODO.COMMIT'; value: string }
+  | { type: 'TODO.COMMIT'; todo: ITodo }
+  | { type: 'TODO.DELETE'; id: ITodo['id'] }
+  | { type: 'SHOW'; filter: Filters }
+  | { type: 'MARK.completed' }
+  | { type: 'MARK.active' }
+  | { type: 'CLEAR_COMPLETED' }
+
+export enum TodosStateValues {
+  'loading' = 'loading',
+  'ready' = 'ready',
+}
+
+type TodosState =
+  | {
+      value: TodosStateValues.loading
+      context: TodosContext & {
+        todo: ''
+        todos: []
+        filter: Filters.SHOW_ALL
+      }
+    }
+  | {
+      value: TodosStateValues.ready
+      context: TodosContext
+    }
+
+export const todosMachine = createMachine<TodosContext, TodosEvent, TodosState>({
   id: 'todos',
   context: {
     todo: '', // new todo
     todos: [],
-    filter: 'all',
+    filter: Filters.SHOW_ALL,
   },
   initial: 'loading',
   states: {
     loading: {
-      entry: assign({
-        todos: (context) => {
-          // "Rehydrate" persisted todos
-          return context.todos.map((todo) => ({
-            ...todo,
-            ref: spawn(createTodoMachine(todo)),
-          }))
+      invoke: {
+        src: 'fetchTodos',
+        onDone: {
+          target: TodosStateValues.ready,
+          actions: assign({
+            todos: (context, event) => {
+              return event.data.map((todo) => ({
+                ...todo,
+                ref: spawn(createTodoMachine(todo)),
+              }))
+            },
+          }),
         },
-      }),
-      always: 'ready',
+      },
+      //   entry: assign({
+      //     todos: (context) => {
+      //       // "Rehydrate" persisted todos
+      //       return context.todos.map()
+      //     },
+      //   }),
+      always: TodosStateValues.ready,
     },
     ready: {},
   },
@@ -50,7 +97,6 @@ export const todosMachine = createMachine({
             })
           },
         }),
-        'persist',
       ],
       cond: (_, event) => event.value.trim().length,
     },
@@ -62,7 +108,6 @@ export const todosMachine = createMachine({
               return todo.id === event.todo.id ? { ...todo, ...event.todo, ref: todo.ref } : todo
             }),
         }),
-        'persist',
       ],
     },
     'TODO.DELETE': {
@@ -70,7 +115,6 @@ export const todosMachine = createMachine({
         assign({
           todos: (context, event) => context.todos.filter((todo) => todo.id !== event.id),
         }),
-        'persist',
       ],
     },
     SHOW: {
