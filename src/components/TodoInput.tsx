@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FC, useState } from 'react'
 import {
   createStyles,
   Divider,
@@ -9,6 +9,9 @@ import {
   Theme,
 } from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add'
+import { useService } from '@xstate/react'
+import { Interpreter } from 'xstate'
+import { TodosContext, TodosEvent, TodosState } from '../state/todosMachine'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -32,22 +35,29 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const TodoInput = () => {
+const TodoInput: FC<{
+  value: string
+  todosService: Interpreter<TodosContext, any, TodosEvent, TodosState>
+}> = ({ value, todosService }) => {
   const classes = useStyles()
-  const INITIAL_INPUT_VALUE = ''
-  const [inputValue, setInputValue] = useState(INITIAL_INPUT_VALUE)
+  const [state, send] = useService(todosService)
+  console.log('> ~ state', state)
+  // const INITIAL_INPUT_VALUE = ''
+  // const [inputValue, setInputValue] = useState(INITIAL_INPUT_VALUE)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value)
+    // setInputValue(e.target.value)
+    send({ type: 'NEWTODO.CHANGE', value: e.target.value })
   }
 
   const handleAdd = () => {
-    setInputValue(INITIAL_INPUT_VALUE)
+    // setInputValue(INITIAL_INPUT_VALUE)
+    send({ type: 'NEWTODO.COMMIT', value: 'test' })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (e.code === 'Enter' || e.code === 'NumpadEnter') {
-      e.preventDefault()
+      // e.preventDefault()
       handleAdd()
     }
   }
@@ -57,9 +67,10 @@ const TodoInput = () => {
       <InputBase
         className={classes.input}
         placeholder='Add Todo'
-        value={inputValue}
+        value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
+        autoFocus
       />
       <Divider className={classes.divider} orientation='vertical' />
       <IconButton color='primary' className={classes.iconButton} onClick={handleAdd}>

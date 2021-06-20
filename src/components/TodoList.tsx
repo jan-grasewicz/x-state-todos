@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import {
   AppBar,
   Button,
@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@material-ui/core'
 import TodoListItem from './TodoListItem'
-import { Filters } from '../types'
+import { Filters, ITodo } from '../types'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -37,15 +37,15 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const TodoList = () => {
+const TodoList: FC<{ todos: ITodo[] }> = ({ todos }) => {
   const classes = useStyles()
 
-  const filteredTodosIds =
-    activeFilter === Filters.SHOW_ACTIVE
-      ? activeTodosIds
-      : activeFilter === Filters.SHOW_COMPLETED
-      ? completedTodosIds
-      : allTodosIds
+  const filteredTodosIds: number[] = []
+  //   activeFilter === Filters.SHOW_ACTIVE
+  //     ? activeTodosIds
+  //     : activeFilter === Filters.SHOW_COMPLETED
+  //     ? completedTodosIds
+  //     : allTodosIds
 
   const handleFilterChange = (event: React.ChangeEvent<{}>, newValue: Filters) => {}
 
@@ -63,7 +63,8 @@ const TodoList = () => {
     <Paper>
       <AppBar position='static' color='default' elevation={0}>
         <Tabs
-          value={activeFilter}
+          // value={activeFilter}
+          value={Filters.SHOW_ALL}
           onChange={handleFilterChange}
           variant='fullWidth'
           indicatorColor='primary'
@@ -76,12 +77,12 @@ const TodoList = () => {
       </AppBar>
 
       <List className={classes.list}>
-        {!filteredTodosIds.length ? (
+        {!todos.length ? (
           <Typography className={classes.info} color='textSecondary' variant='subtitle2'>
             No todos
           </Typography>
         ) : (
-          filteredTodosIds.map((todoId) => <TodoListItem key={todoId} id={todoId} />)
+          todos.map((todo) => <TodoListItem key={todo.id} {...todo} />)
         )}
       </List>
 
