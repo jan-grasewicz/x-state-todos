@@ -82,7 +82,9 @@ const TodoList: FC<{ todos: ITodo[] }> = ({ todos }) => {
             No todos
           </Typography>
         ) : (
-          todos.map((todo) => <TodoListItem key={todo.id} {...todo} />)
+          todos.map(({ id, title, completed }) => (
+            <TodoListItem key={id} id={id} title={title} completed={completed} />
+          ))
         )}
       </List>
 

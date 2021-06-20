@@ -1,6 +1,6 @@
 import { createMachine, assign, spawn } from 'xstate'
 import { Filters, ITodo } from '../types'
-// import { createTodoMachine } from './todoMachine'
+import { createTodoMachine } from './todoMachine'
 
 const createTodo = (title: string) => {
   return {
@@ -18,7 +18,7 @@ export interface TodosContext {
 
 export type TodosEvent =
   | { type: 'NEWTODO.CHANGE'; value: string }
-  | { type: 'NEWTODO.COMMIT'; value: string }
+  | { type: 'NEWTODO.COMMIT' }
   | { type: 'TODO.COMMIT'; todo: ITodo }
   | { type: 'TODO.DELETE'; id: ITodo['id'] }
   | { type: 'SHOW'; filter: Filters }
@@ -74,22 +74,21 @@ export const todosMachine = createMachine<TodosContext, TodosEvent, TodosState>(
         newTodo: (_, event) => event.value,
       }),
     },
-    // 'NEWTODO.COMMIT': {
-    //   actions: [
-    //     assign({
-    //       todo: '', // clear todo
-    //       todos: (context, event) => {
-    //         const newTodo = createTodo(event.value.trim())
-    //         return context.todos.concat({
-    //           ...newTodo,
-    //           ref: spawn(createTodoMachine(newTodo)),
-    //         })
-    //       },
-    //     }),
-    //     'persist',
-    //   ],
-    //   cond: (_, event) => event.value.trim().length,
-    // },
+    'NEWTODO.COMMIT': {
+      actions: [
+        assign({
+          newTodo: '',
+          todos: (context: TodosContext, event) => {
+            const newTodoObj = createTodo(context.newTodo.trim())
+            return context.todos.concat({
+              ...newTodoObj,
+              ref: spawn(createTodoMachine(newTodoObj)),
+            })
+          },
+        }),
+      ],
+      cond: (context) => !!context.newTodo.trim().length,
+    },
     // 'TODO.COMMIT': {
     //   actions: [
     //     assign({

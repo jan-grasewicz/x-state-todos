@@ -41,7 +41,6 @@ const TodoInput: FC<{
 }> = ({ value, todosService }) => {
   const classes = useStyles()
   const [state, send] = useService(todosService)
-  console.log('> ~ state', state)
   // const INITIAL_INPUT_VALUE = ''
   // const [inputValue, setInputValue] = useState(INITIAL_INPUT_VALUE)
 
@@ -52,12 +51,12 @@ const TodoInput: FC<{
 
   const handleAdd = () => {
     // setInputValue(INITIAL_INPUT_VALUE)
-    send({ type: 'NEWTODO.COMMIT', value: 'test' })
+    send({ type: 'NEWTODO.COMMIT' })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (e.code === 'Enter' || e.code === 'NumpadEnter') {
-      // e.preventDefault()
+      e.preventDefault()
       handleAdd()
     }
   }
