@@ -2,7 +2,6 @@ export interface ITodo {
   id: number
   title: string
   completed: boolean
-  ref?: any
 }
 
 export enum Filters {
