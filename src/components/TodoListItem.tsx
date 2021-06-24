@@ -6,6 +6,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import IconButton from '@material-ui/core/IconButton'
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever'
 import { ITodo } from '../types'
+import { useActor } from '@xstate/react'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -22,6 +23,7 @@ type Props = Omit<ITodo, 'ref'> & { todoRef: ITodo['ref'] }
 
 const TodoListItem: React.FC<Props> = ({ id, title, completed, todoRef }) => {
   const classes = useStyles()
+  // const [state, send] = useActor(todoRef)
 
   const handleToggle = () => {}
   const handleDelete = () => {}

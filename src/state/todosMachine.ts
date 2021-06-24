@@ -83,10 +83,8 @@ export const todosMachine = createMachine<TodosContext, TodosEvent, TodosState>(
           newTodo: '',
           todos: (context: TodosContext, event) => {
             const newTodoObj = createTodo(context.newTodo.trim())
-            return context.todos.concat({
-              ...newTodoObj,
-              ref: spawn(createTodoMachine(newTodoObj)),
-            })
+            const ref = spawn(createTodoMachine(newTodoObj))
+            return context.todos.concat({ ...newTodoObj, ref })
           },
         }),
       ],
