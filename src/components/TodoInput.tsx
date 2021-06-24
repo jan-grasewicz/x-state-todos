@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import {
   createStyles,
   Divider,
@@ -10,8 +10,7 @@ import {
 } from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add'
 import { useService } from '@xstate/react'
-import { Interpreter } from 'xstate'
-import { TodosContext, TodosEvent, TodosState } from '../state/todosMachine'
+import { TodosServiceType } from '../state/todosMachine'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -36,21 +35,17 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 const TodoInput: FC<{
-  value: string
-  todosService: Interpreter<TodosContext, any, TodosEvent, TodosState>
-}> = ({ value, todosService }) => {
+  todosService: TodosServiceType
+}> = ({ todosService }) => {
   const classes = useStyles()
   const [state, send] = useService(todosService)
-  // const INITIAL_INPUT_VALUE = ''
-  // const [inputValue, setInputValue] = useState(INITIAL_INPUT_VALUE)
+  const { newTodo } = state.context
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // setInputValue(e.target.value)
     send({ type: 'NEWTODO.CHANGE', value: e.target.value })
   }
 
   const handleAdd = () => {
-    // setInputValue(INITIAL_INPUT_VALUE)
     send({ type: 'NEWTODO.COMMIT' })
   }
 
@@ -66,7 +61,7 @@ const TodoInput: FC<{
       <InputBase
         className={classes.input}
         placeholder='Add Todo'
-        value={value}
+        value={newTodo}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         autoFocus

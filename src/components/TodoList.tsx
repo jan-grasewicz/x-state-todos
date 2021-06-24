@@ -11,6 +11,8 @@ import {
   Theme,
   Typography,
 } from '@material-ui/core'
+import { useService } from '@xstate/react'
+import { TodosServiceType } from '../state/todosMachine'
 import TodoListItem from './TodoListItem'
 import { Filters, ITodo } from '../types'
 
@@ -37,21 +39,36 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const TodoList: FC<{ todos: ITodo[] }> = ({ todos }) => {
+const filterTodos = (filter: Filters, todos: ITodo[]) => {
+  if (filter === Filters.SHOW_ACTIVE) {
+    return todos.filter((todo) => !todo.completed)
+  }
+  if (filter === Filters.SHOW_COMPLETED) {
+    return todos.filter((todo) => todo.completed)
+  }
+  return todos
+}
+
+const TodoList: FC<{
+  todosService: TodosServiceType
+}> = ({ todosService }) => {
   const classes = useStyles()
+  const [state, send] = useService(todosService)
+  const { filter, todos } = state.context
 
-  const filteredTodosIds: number[] = []
-  //   activeFilter === Filters.SHOW_ACTIVE
-  //     ? activeTodosIds
-  //     : activeFilter === Filters.SHOW_COMPLETED
-  //     ? completedTodosIds
-  //     : allTodosIds
+  const filteredTodos = filterTodos(filter, todos)
 
-  const handleFilterChange = (event: React.ChangeEvent<{}>, newValue: Filters) => {}
+  const handleFilterChange = (event: React.ChangeEvent<{}>, newValue: Filters) => {
+    send({ type: 'SHOW', filter: newValue })
+  }
 
-  const handleDeleteAll = () => {}
+  const handleDeleteAll = () => {
+    send({ type: 'CLEAR_ALL' })
+  }
 
-  const handleDeleteCompleted = () => {}
+  const handleDeleteCompleted = () => {
+    send({ type: 'CLEAR_COMPLETED' })
+  }
 
   const tabsArray = [
     { label: 'Active', filter: Filters.SHOW_ACTIVE },
@@ -63,8 +80,7 @@ const TodoList: FC<{ todos: ITodo[] }> = ({ todos }) => {
     <Paper>
       <AppBar position='static' color='default' elevation={0}>
         <Tabs
-          // value={activeFilter}
-          value={Filters.SHOW_ALL}
+          value={filter}
           onChange={handleFilterChange}
           variant='fullWidth'
           indicatorColor='primary'
@@ -77,13 +93,13 @@ const TodoList: FC<{ todos: ITodo[] }> = ({ todos }) => {
       </AppBar>
 
       <List className={classes.list}>
-        {!todos.length ? (
+        {!filteredTodos.length ? (
           <Typography className={classes.info} color='textSecondary' variant='subtitle2'>
             No todos
           </Typography>
         ) : (
-          todos.map(({ id, title, completed }) => (
-            <TodoListItem key={id} id={id} title={title} completed={completed} />
+          filteredTodos.map(({ id, title, completed, ref }) => (
+            <TodoListItem key={id} id={id} title={title} completed={completed} todoRef={ref} />
           ))
         )}
       </List>

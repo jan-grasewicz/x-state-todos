@@ -18,9 +18,9 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-// type TodoId = Pick<ITodo, 'id'>
+type Props = Omit<ITodo, 'ref'> & { todoRef: ITodo['ref'] }
 
-const TodoListItem: React.FC<ITodo> = ({ id, title, completed }) => {
+const TodoListItem: React.FC<Props> = ({ id, title, completed, todoRef }) => {
   const classes = useStyles()
 
   const handleToggle = () => {}

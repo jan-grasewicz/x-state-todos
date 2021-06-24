@@ -1,4 +1,4 @@
-import { createMachine, assign, spawn } from 'xstate'
+import { createMachine, assign, spawn, Interpreter } from 'xstate'
 import { Filters, ITodo } from '../types'
 import { createTodoMachine } from './todoMachine'
 
@@ -25,6 +25,7 @@ export type TodosEvent =
   | { type: 'MARK.completed' }
   | { type: 'MARK.active' }
   | { type: 'CLEAR_COMPLETED' }
+  | { type: 'CLEAR_ALL' }
 
 export enum TodosStateValues {
   'loading' = 'loading',
@@ -45,11 +46,13 @@ export type TodosState =
       context: TodosContext
     }
 
+export type TodosServiceType = Interpreter<TodosContext, any, TodosEvent, TodosState>
+
 export const todosMachine = createMachine<TodosContext, TodosEvent, TodosState>({
   id: 'todos',
   context: {
     newTodo: '',
-    todos: [{ id: 1, title: 'first', completed: false }],
+    todos: [{ id: 1, title: 'first', completed: true }],
     filter: Filters.SHOW_ALL,
   },
   initial: 'loading',
@@ -100,19 +103,18 @@ export const todosMachine = createMachine<TodosContext, TodosEvent, TodosState>(
     //     'persist',
     //   ],
     // },
-    // 'TODO.DELETE': {
-    //   actions: [
-    //     assign({
-    //       todos: (context, event) => context.todos.filter((todo) => todo.id !== event.id),
-    //     }),
-    //     'persist',
-    //   ],
-    // },
-    // SHOW: {
-    //   actions: assign({
-    //     filter: (_, event) => event.filter,
-    //   }),
-    // },
+    'TODO.DELETE': {
+      actions: [
+        assign({
+          todos: (context, event) => context.todos.filter((todo) => todo.id !== event.id),
+        }),
+      ],
+    },
+    SHOW: {
+      actions: assign({
+        filter: (_, event) => event.filter,
+      }),
+    },
     // 'MARK.completed': {
     //   actions: (context) => {
     //     context.todos.forEach((todo) => todo.ref.send('SET_COMPLETED'))
@@ -123,10 +125,15 @@ export const todosMachine = createMachine<TodosContext, TodosEvent, TodosState>(
     //     context.todos.forEach((todo) => todo.ref.send('SET_ACTIVE'))
     //   },
     // },
-    // CLEAR_COMPLETED: {
-    //   actions: assign({
-    //     todos: (context) => context.todos.filter((todo: ITodo) => !todo.completed),
-    //   }),
-    // },
+    CLEAR_COMPLETED: {
+      actions: assign({
+        todos: (context) => context.todos.filter((todo: ITodo) => !todo.completed),
+      }),
+    },
+    CLEAR_ALL: {
+      actions: assign({
+        todos: (_) => [], // can't remove props completely or I get ts error
+      }),
+    },
   },
 })
