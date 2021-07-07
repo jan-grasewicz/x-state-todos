@@ -1,8 +1,37 @@
 import { createMachine, assign, sendParent } from 'xstate'
 import { ITodo } from '../types'
 
-export const createTodoMachine = ({ id, title, completed }: ITodo) =>
-  createMachine(
+export interface TodoContext {
+  id: ITodo['id']
+  title: ITodo['title']
+  prevTitle: ITodo['title']
+  completed: ITodo['completed']
+}
+
+export type TodoEvent = { type: 'TOGGLE_COMPLETE' } | { type: 'DELETE' }
+
+export enum TodoStateValues {
+  'reading' = 'reading',
+  'editing' = 'editing',
+  'deleted' = 'deleted',
+}
+
+export type TodoState =
+  | {
+      value: TodoStateValues.reading
+      context: TodoContext
+    }
+  | {
+      value: TodoStateValues.editing
+      context: TodoContext
+    }
+  | {
+      value: TodoStateValues.deleted
+      context: TodoContext
+    }
+
+export const createTodoMachine = ({ id, title, completed }: Omit<ITodo, 'ref'>) =>
+  createMachine<TodoContext, TodoEvent, TodoState>(
     {
       id: 'todo',
       initial: 'reading',

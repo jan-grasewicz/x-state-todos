@@ -19,11 +19,12 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-type Props = Omit<ITodo, 'ref'> & { todoRef: ITodo['ref'] }
+type Props = { todoRef: ITodo['ref'] }
 
-const TodoListItem: React.FC<Props> = ({ id, title, completed, todoRef }) => {
+const TodoListItem: React.FC<Props> = ({ todoRef }) => {
   const classes = useStyles()
-  // const [state, send] = useActor(todoRef)
+  const [state, send] = useActor(todoRef)
+  const { id, title, completed } = state.context
 
   const handleToggle = () => {}
   const handleDelete = () => {}

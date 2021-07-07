@@ -2,7 +2,7 @@ import { createMachine, assign, spawn, Interpreter } from 'xstate'
 import { Filters, ITodo } from '../types'
 import { createTodoMachine } from './todoMachine'
 
-const createTodo = (title: string) => {
+const createTodo = (title: string): Omit<ITodo, 'ref'> => {
   return {
     id: Number(String(Date.now()) + String(Math.floor(Math.random() * Math.pow(10, 5)))),
     title,
@@ -52,7 +52,7 @@ export const todosMachine = createMachine<TodosContext, TodosEvent, TodosState>(
   id: 'todos',
   context: {
     newTodo: '',
-    todos: [{ id: 1, title: 'first', completed: true }],
+    todos: [],
     filter: Filters.SHOW_ALL,
   },
   initial: 'loading',

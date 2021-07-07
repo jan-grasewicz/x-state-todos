@@ -98,9 +98,7 @@ const TodoList: FC<{
             No todos
           </Typography>
         ) : (
-          filteredTodos.map(({ id, title, completed, ref }) => (
-            <TodoListItem key={id} id={id} title={title} completed={completed} todoRef={ref} />
-          ))
+          filteredTodos.map(({ id, ref }) => <TodoListItem key={id} todoRef={ref} />)
         )}
       </List>
 

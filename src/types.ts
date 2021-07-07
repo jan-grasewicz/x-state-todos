@@ -1,8 +1,22 @@
+import { SpawnedActorRef, State } from 'xstate'
+import { TodoContext, TodoEvent } from './state/todoMachine'
+
 export interface ITodo {
   id: number
   title: string
   completed: boolean
-  ref?: any
+  ref: SpawnedActorRef<
+    TodoEvent,
+    State<
+      TodoContext,
+      TodoEvent,
+      any,
+      {
+        value: any
+        context: TodoContext
+      }
+    >
+  >
 }
 
 export enum Filters {
