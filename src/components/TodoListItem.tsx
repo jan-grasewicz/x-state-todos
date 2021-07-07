@@ -26,7 +26,9 @@ const TodoListItem: React.FC<Props> = ({ todoRef }) => {
   const [state, send] = useActor(todoRef)
   const { id, title, completed } = state.context
 
-  const handleToggle = () => {}
+  const handleToggle = () => {
+    send({ type: 'TOGGLE_COMPLETE' })
+  }
   const handleDelete = () => {}
 
   return (

@@ -56,9 +56,9 @@ export const createTodoMachine = ({ id, title, completed }: Omit<ITodo, 'ref'>) 
             // SET_COMPLETED: {
             //   actions: [assign({ completed: true }), 'commit'],
             // },
-            // TOGGLE_COMPLETE: {
-            //   actions: [assign({ completed: (context) => !context.completed }), 'commit'],
-            // },
+            TOGGLE_COMPLETE: {
+              actions: assign({ completed: (context) => !context.completed }),
+            },
             // SET_ACTIVE: {
             //   actions: [assign({ completed: false }), 'commit'],
             // },
